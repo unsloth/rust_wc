@@ -41,7 +41,7 @@ pub struct Cli {
     chars: bool,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct FileInfo {
     num_lines: usize,
     num_words: usize,
@@ -66,11 +66,13 @@ pub fn run() -> MyResult<()> {
     }
 
     for filename in &cli.files {
-        match open(&filename) {
+        match open(filename) {
             Err(err) => eprintln!("{}: {}", filename, err),
             Ok(file_data) => {
                 let result = count(file_data)?;
+
                 print_result(&cli, &result);
+                // if the input was stdin, don't include a filename
                 if filename != "-" {
                     print!(" {}", filename);
                 }
@@ -118,9 +120,11 @@ pub fn count(mut file: impl BufRead) -> MyResult<FileInfo> {
     let mut num_bytes: usize = 0;
     let mut num_chars: usize = 0;
 
+    // start bytes_in_line as >0 to initiate the while loop
     let mut bytes_in_line = 1;
     while bytes_in_line != 0 {
         let mut buf = String::new();
+        // bytes_in_line will be 0 at EOF
         bytes_in_line = file.read_line(&mut buf)?;
         if bytes_in_line != 0 {
             num_lines += 1
