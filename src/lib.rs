@@ -70,7 +70,7 @@ pub fn run() -> MyResult<()> {
                     print!("{:>8}", result.num_words)
                 }
                 if cli.bytes {
-                    print!("{:>8}", result.num_words)
+                    print!("{:>8}", result.num_bytes)
                 }
                 if cli.chars {
                     print!("{:>8}", result.num_chars)
@@ -94,6 +94,18 @@ pub fn count(mut file: impl BufRead) -> MyResult<FileInfo> {
     let mut num_words: usize = 0;
     let mut num_bytes: usize = 0;
     let mut num_chars: usize = 0;
+
+    let mut bytes_in_line = 1;
+    while bytes_in_line != 0 {
+        let mut buf = String::new();
+        bytes_in_line = file.read_line(&mut buf)?;
+        if bytes_in_line != 0 {
+            num_lines += 1
+        };
+        num_words += buf.split_whitespace().count();
+        num_bytes += bytes_in_line;
+        num_chars += buf.chars().count();
+    }
 
     Ok(FileInfo {
         num_lines,
