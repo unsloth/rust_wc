@@ -55,7 +55,23 @@ pub fn run() -> MyResult<()> {
     for filename in cli.files {
         match open(&filename) {
             Err(err) => eprintln!("{}: {}", filename, err),
-            Ok(_) => println!("{} opened", filename),
+            Ok(file_data) => {
+                let result = count(file_data)?;
+                // print_result(&result, &cli);
+                if cli.lines {
+                    print!("{:>8}", result.num_lines)
+                }
+                if cli.words {
+                    print!("{:>8}", result.num_words)
+                }
+                if cli.bytes {
+                    print!("{:>8}", result.num_words)
+                }
+                if cli.chars {
+                    print!("{:>8}", result.num_chars)
+                }
+                println!(" {}", filename);
+            }
         }
     }
     Ok(())
@@ -82,6 +98,22 @@ pub fn count(mut file: impl BufRead) -> MyResult<FileInfo> {
     })
 }
 
+/*
+fn print_result(result: &FileInfo, cli: &Cli) {
+    if cli.lines {
+        print!("{:>8}", result.num_lines)
+    }
+    if cli.words {
+        print!("{:>8}", result.num_words)
+    }
+    if cli.bytes {
+        print!("{:>8}", result.num_words)
+    }
+    if cli.chars {
+        print!("{:>8}", result.num_chars)
+    }
+}
+*/
 #[cfg(test)]
 mod tests {
     use super::{count, FileInfo};
