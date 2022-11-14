@@ -52,6 +52,7 @@ pub struct FileInfo {
 pub fn run() -> MyResult<()> {
     let mut cli = Cli::parse();
 
+    // let multiple_files = cli.files.len() > 1;
     if !cli.lines && !cli.bytes && !cli.words && !cli.chars {
         cli.lines = true;
         cli.bytes = true;
@@ -75,7 +76,10 @@ pub fn run() -> MyResult<()> {
                 if cli.chars {
                     print!("{:>8}", result.num_chars)
                 }
-                println!(" {}", filename);
+                if filename != "-" {
+                    print!(" {}", filename);
+                }
+                println!();
             }
         }
     }
