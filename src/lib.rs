@@ -17,16 +17,16 @@ pub struct Cli {
     #[arg(default_values = vec!["-"], help = "File(s) to count")]
     files: Vec<String>,
 
-    #[arg(short, long, default_value_t = true, help = "Output line count")]
+    #[arg(short, long, default_value_t = false, help = "Output line count")]
     lines: bool,
 
-    #[arg(short, long, default_value_t = true, help = "Output word count")]
+    #[arg(short, long, default_value_t = false, help = "Output word count")]
     words: bool,
 
     #[arg(
         short = 'c',
         long,
-        default_value_t = true,
+        default_value_t = false,
         help = "Output number of bytes"
     )]
     bytes: bool,
@@ -50,14 +50,19 @@ pub struct FileInfo {
 }
 
 pub fn run() -> MyResult<()> {
-    let cli = Cli::parse();
+    let mut cli = Cli::parse();
+
+    if !cli.lines && !cli.bytes && !cli.words && !cli.chars {
+        cli.lines = true;
+        cli.bytes = true;
+        cli.words = true;
+    }
 
     for filename in cli.files {
         match open(&filename) {
             Err(err) => eprintln!("{}: {}", filename, err),
             Ok(file_data) => {
                 let result = count(file_data)?;
-                // print_result(&result, &cli);
                 if cli.lines {
                     print!("{:>8}", result.num_lines)
                 }
@@ -98,22 +103,6 @@ pub fn count(mut file: impl BufRead) -> MyResult<FileInfo> {
     })
 }
 
-/*
-fn print_result(result: &FileInfo, cli: &Cli) {
-    if cli.lines {
-        print!("{:>8}", result.num_lines)
-    }
-    if cli.words {
-        print!("{:>8}", result.num_words)
-    }
-    if cli.bytes {
-        print!("{:>8}", result.num_words)
-    }
-    if cli.chars {
-        print!("{:>8}", result.num_chars)
-    }
-}
-*/
 #[cfg(test)]
 mod tests {
     use super::{count, FileInfo};
