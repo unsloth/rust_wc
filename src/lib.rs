@@ -52,38 +52,57 @@ pub struct FileInfo {
 pub fn run() -> MyResult<()> {
     let mut cli = Cli::parse();
 
-    // let multiple_files = cli.files.len() > 1;
+    let mut total_result = FileInfo {
+        num_lines: 0,
+        num_words: 0,
+        num_bytes: 0,
+        num_chars: 0,
+    };
+
     if !cli.lines && !cli.bytes && !cli.words && !cli.chars {
         cli.lines = true;
         cli.bytes = true;
         cli.words = true;
     }
 
-    for filename in cli.files {
+    for filename in &cli.files {
         match open(&filename) {
             Err(err) => eprintln!("{}: {}", filename, err),
             Ok(file_data) => {
                 let result = count(file_data)?;
-                if cli.lines {
-                    print!("{:>8}", result.num_lines)
-                }
-                if cli.words {
-                    print!("{:>8}", result.num_words)
-                }
-                if cli.bytes {
-                    print!("{:>8}", result.num_bytes)
-                }
-                if cli.chars {
-                    print!("{:>8}", result.num_chars)
-                }
+                print_result(&cli, &result);
                 if filename != "-" {
                     print!(" {}", filename);
                 }
                 println!();
+
+                total_result.num_lines += result.num_lines;
+                total_result.num_words += result.num_words;
+                total_result.num_bytes += result.num_bytes;
+                total_result.num_chars += result.num_chars;
             }
         }
     }
+    if cli.files.len() > 1 {
+        print_result(&cli, &total_result);
+        println!(" total");
+    }
     Ok(())
+}
+
+fn print_result(cli: &Cli, result: &FileInfo) {
+    if cli.lines {
+        print!("{:>8}", result.num_lines)
+    }
+    if cli.words {
+        print!("{:>8}", result.num_words)
+    }
+    if cli.bytes {
+        print!("{:>8}", result.num_bytes)
+    }
+    if cli.chars {
+        print!("{:>8}", result.num_chars)
+    }
 }
 
 fn open(filename: &str) -> MyResult<Box<dyn BufRead>> {
