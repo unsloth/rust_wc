@@ -114,7 +114,7 @@ fn open(filename: &str) -> MyResult<Box<dyn BufRead>> {
     }
 }
 
-pub fn count(mut file: impl BufRead) -> MyResult<FileInfo> {
+fn count(mut file: impl BufRead) -> MyResult<FileInfo> {
     let mut num_lines: usize = 0;
     let mut num_words: usize = 0;
     let mut num_bytes: usize = 0;
